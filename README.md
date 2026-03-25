@@ -1,3 +1,8 @@
+![build](https://img.shields.io/github/actions/workflow/status/xmlobjects/object-copier/object-copier-build.yml?logo=Gradle)
+![release](https://img.shields.io/github/v/release/xmlobjects/object-copier?display_name=tag)
+![maven](https://img.shields.io/maven-central/v/org.xmlobjects/object-copier)
+[![license](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 # object-copier
 
 A flexible deep and shallow copy framework for Java objects.
