@@ -1,2 +1,257 @@
 # object-copier
-Configurable deep and shallow copy framework for Java with pluggable cloners and circular reference detection
+
+A flexible deep and shallow copy framework for Java objects.
+
+## Features
+
+- **Deep and shallow copy** of arbitrary Java objects
+- **Circular reference detection** via reusable copy sessions
+- **Pluggable cloners** – register custom `TypeCloner` implementations per type
+- **Superclass cloner inheritance** – a cloner registered for `Animal` is automatically used for `Dog`
+- **`Copyable` interface** – let objects control their own copy behaviour
+- **`CopyCallback` interface** – `preCopy` / `postCopy` lifecycle hooks
+- **`@CopyIgnore`** – exclude individual fields from copying
+- **`@CopyCreator`** – custom factory method for instance creation
+- **Built-in support** for collections, maps, arrays, `Optional`, enums, records and all common JDK value types
+- **Thread-safe** after construction
+
+## Requirements
+
+- Java 17 or later
+
+## Installation
+
+**Maven**
+```xml
+<dependency>
+    <groupId>org.xmlobjects</groupId>
+    <artifactId>object-copier</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+**Gradle**
+```groovy
+implementation 'org.xmlobjects:object-copier:1.0.0'
+```
+
+## Quick Start
+
+```java
+// Create a default Copier (no configuration needed)
+Copier copier = CopierBuilder.newCopier();
+
+// Deep copy
+MyObject clone = copier.deepCopy(original);
+
+// Shallow copy
+MyObject shallowClone = copier.shallowCopy(original);
+```
+
+A `Copier` is immutable after construction and safe to share across threads.
+
+## Copy Modes
+
+| Mode | Behaviour |
+|------|-----------|
+| `deepCopy` | All reachable objects are recursively cloned |
+| `shallowCopy` | Only the top-level object is cloned; field references are shared |
+
+Both modes support an optional `dest` target object and an optional `template` class:
+
+```java
+// Copy into an existing object
+copier.deepCopy(src, dest);
+
+// Copy using a superclass as the field template
+copier.deepCopy(src, dest, AbstractBase.class);
+```
+
+## Copy Sessions
+
+A `CopySession` tracks all clones created during a copy operation and is used to detect circular references. By default each top-level copy call creates its own session. Pass an explicit session to share the clone cache across multiple calls:
+
+```java
+try (CopySession session = copier.createSession()) {
+    BuildingA cloneA = copier.deepCopy(buildingA, session);
+    BuildingB cloneB = copier.deepCopy(buildingB, session);
+    // Cross-references between A and B are resolved correctly
+}
+```
+
+`CopySession` implements `AutoCloseable`. Closing it releases the internal clone map.
+
+You can also look up a previously created clone:
+
+```java
+MyObject clone = session.lookupClone(original, MyObject.class);
+```
+
+## Configuration
+
+Use `CopierBuilder` to configure a `Copier`:
+
+```java
+Copier copier = CopierBuilder.newInstance()
+    .withCloner(MyType.class, new MyTypeCloner())
+    .withSelfCopy(ImmutablePoint.class)   // returned as-is, no copy
+    .withNullCopy(Placeholder.class)      // always returns null
+    .build();
+```
+
+### `withSelfCopy`
+
+Types registered with `withSelfCopy` are returned as-is without cloning. Useful for truly immutable types that are not already detected automatically (e.g. custom value objects).
+
+### `withNullCopy`
+
+Types registered with `withNullCopy` are replaced with `null` during a copy. Useful for excluding specific types such as caches or external handles.
+
+## Built-in Identity Types
+
+The following JDK types are automatically treated as immutable and returned as-is (no copy):
+
+- All primitive wrappers (`Integer`, `Long`, `Boolean`, …)
+- `String`, `BigDecimal`, `BigInteger`
+- `URI`, `URL`, `UUID`, `Pattern`, `Charset`, `Locale`, `Currency`
+- All `java.time` types (`LocalDate`, `ZonedDateTime`, `Duration`, …)
+- `Enum` constants and `record` types
+- `Collections.emptyList()`, `emptyMap()`, `emptySet()`
+- `OptionalInt`, `OptionalLong`, `OptionalDouble`
+
+## Custom Cloners
+
+Extend `TypeCloner<T>` to control instantiation and field copying for a specific type:
+
+```java
+public class PersonCloner extends TypeCloner<Person> {
+
+    @Override
+    protected Person newInstance(Person src, CopyMode mode, CopyContext context) {
+        return new Person(src.getId()); // custom construction
+    }
+
+    @Override
+    protected void deepCopy(Person src, Person dest, CopyContext context) {
+        dest.setName(context.deepCopy(src.getName()));
+        dest.setAddress(context.deepCopy(src.getAddress()));
+    }
+}
+
+Copier copier = CopierBuilder.newInstance()
+    .withCloner(Person.class, new PersonCloner())
+    .build();
+```
+
+Extend `ObjectCloner<T>` if you only need custom instantiation but want automatic reflection-based field copying:
+
+```java
+public class PersonCloner extends ObjectCloner<Person> {
+
+    public PersonCloner() {
+        super(Person.class);
+    }
+
+    @Override
+    protected Person newInstance(Person src, CopyMode mode, CopyContext context) {
+        return new Person(src.getId());
+    }
+}
+```
+
+### Superclass Cloner Inheritance
+
+A cloner registered for a superclass is automatically used for all subclasses that have no cloner of their own:
+
+```java
+CopierBuilder.newInstance()
+    .withCloner(AbstractFeature.class, new FeatureCloner())
+    .build();
+// FeatureCloner is also used for Building, Road, etc.
+```
+
+## `Copyable` Interface
+
+Implement `Copyable<T>` to let a class control its own copy behaviour. This is the recommended approach for complex class hierarchies:
+
+```java
+public class Building extends AbstractFeature implements Copyable<Building> {
+
+    @Override
+    public void deepCopyTo(Building dest, CopyContext context) {
+        dest.setName(context.deepCopy(getName()));
+        dest.setParts(context.deepCopy(getParts()));
+    }
+}
+```
+
+The default implementations of `newInstance`, `shallowCopyTo` and `deepCopyTo` fall back to reflection, so you only need to override what differs.
+
+### `@CopyCreator`
+
+Use `@CopyCreator` on a `newInstance(CopyMode, CopyContext)` method when a class cannot be instantiated via a no-arg constructor:
+
+```java
+public class ImmutableId implements Copyable<ImmutableId> {
+
+    private final String value;
+
+    public ImmutableId(String value) {
+        this.value = value;
+    }
+
+    @CopyCreator
+    public ImmutableId newInstance(CopyMode mode, CopyContext context) {
+        return new ImmutableId(value);
+    }
+}
+```
+
+## `@CopyIgnore`
+
+Annotate fields that should be excluded from all copy operations:
+
+```java
+public class MyObject {
+    private String name;
+
+    @CopyIgnore
+    private transient CachedResult cache; // never copied
+}
+```
+
+`@CopyIgnore` is evaluated once per class at first copy and then cached permanently – no runtime overhead.
+
+## `CopyCallback`
+
+Implement `CopyCallback` to receive lifecycle notifications during copying. Both `src` and `clone` receive the callbacks independently:
+
+```java
+public class Building implements Copyable<Building>, CopyCallback {
+
+    @Override
+    public void preCopy(CopyContext context, CopyMode mode, boolean isRoot) {
+        // called on src before the clone is created
+    }
+
+    @Override
+    public void postCopy(CopyContext context, CopyMode mode, boolean isRoot) {
+        // called on clone after all fields have been copied
+    }
+}
+```
+
+`isRoot` is `true` only for the top-level object of a copy operation.
+
+## Module System
+
+The framework is compatible with the Java module system. Classes in named modules must open their packages to allow reflection-based field access:
+
+```java
+// module-info.java of the module containing classes to be copied
+module com.example.myapp {
+    opens com.example.myapp.model to org.xmlobjects; // adjust to actual module name
+}
+```
+
+Alternatively, implement `Copyable` or register a `TypeCloner` – both bypass reflection entirely.
