@@ -88,7 +88,8 @@ public class CopyHelper {
                     || candidate.getParameterTypes()[0] != CopyMode.class
                     || candidate.getParameterTypes()[1] != CopyContext.class) {
                 throw new CopyException("Malformed @CopyCreator method on " + type.getName() + ". Expected a " +
-                        "non-static method 'newInstance(CopyContext)' returning an instance of the declaring class.");
+                        "non-static method 'newInstance(CopyMode, CopyContext)' returning an instance of the " +
+                        "declaring class.");
             }
 
             method = candidate;
