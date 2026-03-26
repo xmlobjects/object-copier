@@ -41,6 +41,18 @@ public class CopyContext {
         session.addClone(src, src);
     }
 
+    public void exclude(Object src) {
+        session.exclude(src);
+    }
+
+    public void include(Object src) {
+        session.include(src);
+    }
+
+    public boolean isExcluded(Object src) {
+        return session.isExcluded(src);
+    }
+
     public <T> T shallowCopy(T src) {
         return copier.copy(src, null, null, CopyMode.SHALLOW, this);
     }

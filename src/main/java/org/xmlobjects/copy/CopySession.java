@@ -5,13 +5,16 @@
 
 package org.xmlobjects.copy;
 
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class CopySession implements AutoCloseable {
     private static final Object NULL_CLONE = new Object();
     private final Map<Object, Object> clones = new IdentityHashMap<>();
+    private final Set<Object> excludes = Collections.newSetFromMap(new IdentityHashMap<>());
     private boolean closed = false;
     private boolean root = true;
 
@@ -50,6 +53,22 @@ public class CopySession implements AutoCloseable {
         }
     }
 
+    void exclude(Object src) {
+        if (src != null) {
+            excludes.add(src);
+        }
+    }
+
+    void include(Object src) {
+        if (src != null) {
+            excludes.remove(src);
+        }
+    }
+
+    boolean isExcluded(Object src) {
+        return excludes.contains(src);
+    }
+
     boolean isNullClone(Object clone) {
         return clone == null || clone == NULL_CLONE;
     }
@@ -69,5 +88,6 @@ public class CopySession implements AutoCloseable {
         closed = true;
         root = true;
         clones.clear();
+        excludes.clear();
     }
 }

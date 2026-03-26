@@ -123,8 +123,12 @@ public class Copier {
 
         boolean isRoot = session.getAndSetRoot(false);
 
-        T clone = (T) session.getClone(src);
         try {
+            if (session.isExcluded(src)) {
+                return src;
+            }
+
+            T clone = (T) session.getClone(src);
             if (clone == null) {
                 if (src instanceof CopyCallback callback) {
                     callback.preCopy(context, mode, isRoot);

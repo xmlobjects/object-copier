@@ -295,6 +295,46 @@ public class Building implements Copyable<Building>, CopyCallback {
 
 `isRoot` is `true` only for the top-level object of a copy operation.
 
+### Excluding objects during copy
+
+`CopyContext` provides `exclude(Object)` and `include(Object)` to temporarily prevent an object from being copied
+during the current session. An excluded object is returned as-is without being registered in the session's clone map,
+keeping it consistent for subsequent copy operations in the same session.
+
+This is particularly useful when an object holds a reference to a parent that should not be recursively copied:
+
+```java
+public interface Child extends CopyCallback {
+    Child getParent();
+    void setParent(Child parent);
+
+    @Override
+    default void preCopy(CopyContext context, CopyMode mode, boolean isRoot) {
+        if (isRoot) {
+            Child parent = getParent();
+            if (parent != null) {
+                context.exclude(parent);  // parent returned as-is, not copied
+            }
+        }
+    }
+
+    @Override
+    default void postCopy(CopyContext context, CopyMode mode, boolean isRoot) {
+        if (isRoot) {
+            Child parent = getParent();
+            if (parent != null) {
+                context.include(parent);  // re-enable normal copying for parent
+                setParent(null);          // clone is detached from the original parent
+            }
+        }
+    }
+}
+```
+
+Note that `exclude` differs from `withSelfCopy` on `CopyContext`: `exclude` is temporary and
+does not register the excluded object in the clone map, while `withSelfCopy` permanently registers
+it for the lifetime of the session.
+
 ## Module System
 
 The framework is compatible with the Java module system. Classes in named modules must open their packages to allow reflection-based field access:
