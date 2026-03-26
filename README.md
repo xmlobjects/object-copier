@@ -7,9 +7,36 @@
 
 A flexible deep and shallow copy framework for Java objects.
 
+## Table of Contents
+
+- [Latest release](#latest-release)
+- [Features](#features)
+- [Maven artifact](#maven-artifact)
+- [Quick Start](#quick-start)
+- [Default Copy Behaviour](#default-copy-behaviour)
+- [Copy Modes](#copy-modes)
+- [Copy Sessions](#copy-sessions)
+- [Configuration](#configuration)
+- [Built-in Identity Types](#built-in-identity-types)
+- [Custom Cloners](#custom-cloners)
+- [Copyable Interface](#copyable-interface)
+- [@CopyIgnore](#copyignore)
+- [CopyCallback](#copycallback)
+- [Module System](#module-system)
+- [Building](#building)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Latest release
+The latest stable release of object-copier is 1.0.0.
+
+Download the latest object-copier release binaries [here](https://github.com/xmlobjects/object-copier/releases/latest).
+Previous releases are available from the [releases section](https://github.com/xmlobjects/object-copier/releases).
+
 ## Features
 
 - **Deep and shallow copy** of arbitrary Java objects
+- **Reflection-based by default** – copies object fields via reflection
 - **Circular reference detection** via reusable copy sessions
 - **Pluggable cloners** – register custom `TypeCloner` implementations per type
 - **Superclass cloner inheritance** – a cloner registered for `Animal` is automatically used for `Dog`
@@ -19,35 +46,6 @@ A flexible deep and shallow copy framework for Java objects.
 - **`@CopyCreator`** – custom factory method for instance creation
 - **Built-in support** for collections, maps, arrays, `Optional`, enums, records and all common JDK value types
 - **Thread-safe** after construction
-
-## License
-object-copier is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
-See the `LICENSE` file for more details.
-
-## Latest release
-The latest stable release of object-copier is 1.0.0.
-
-Download the latest object-copier release binaries [here](https://github.com/xmlobjects/object-copier/releases/latest).
-Previous releases are available from the [releases section](https://github.com/xmlobjects/object-copier/releases).
-
-## Contributing
-* To file bugs found in the software create a GitHub issue.
-* To contribute code for fixing reported issues create a pull request with the issue id.
-* To propose a new feature create a GitHub issue and open a discussion.
-
-## Building
-object-copier requires Java 17 or higher. The project uses [Gradle](https://gradle.org/) as build system. To build the
-library from source, clone the repository to your local machine and run the following command from the root of the
-repository.
-
-    > gradlew installDist
-
-The script automatically downloads all required dependencies for building the module. So make sure you are connected
-to the internet.
-
-The build process creates the output files in the folder `build/install/object-copier`. Simply put the
-`object-copier-<version>.jar` library file and its mandatory dependencies from the `lib` folder on your modulepath to
-start developing with object-copier. Have fun :-)
 
 ## Maven artifact
 object-copier is also available as Maven artifact from the
@@ -83,6 +81,24 @@ MyObject shallowClone = copier.shallowCopy(original);
 
 A `Copier` is immutable after construction and safe to share across threads.
 
+The examples above use the default configuration described next.
+
+## Default Copy Behaviour
+
+By default, object-copier performs copying via reflection. This includes creating instances and reading/writing fields of a class.
+
+Important defaults:
+
+- `final` fields are skipped in general and are not copied
+- `static` and synthetic fields are skipped
+- A no-arg constructor is expected for default instance creation
+
+If a class does not meet these requirements, use one of the supported alternatives:
+
+- Implement `Copyable` to control copy behaviour in the type itself
+- Use `@CopyCreator` to provide custom instance creation
+- Register a custom `TypeCloner` (or `ObjectCloner`) via `CopierBuilder`
+
 ## Copy Modes
 
 | Mode | Behaviour |
@@ -113,6 +129,9 @@ try (CopySession session = copier.createSession()) {
 ```
 
 `CopySession` implements `AutoCloseable`. Closing it releases the internal clone map.
+
+`CopySession` is not thread-safe and must not be shared across concurrent threads.
+Use one `CopySession` per thread when copying concurrently.
 
 You can also look up a previously created clone:
 
@@ -288,3 +307,26 @@ module com.example.myapp {
 ```
 
 Alternatively, implement `Copyable` or register a `TypeCloner` – both bypass reflection entirely.
+
+## Building
+object-copier requires Java 17 or higher. The project uses [Gradle](https://gradle.org/) as build system. To build the
+library from source, clone the repository to your local machine and run the following command from the root of the
+repository.
+
+    > gradlew installDist
+
+The script automatically downloads all required dependencies for building the module. So make sure you are connected
+to the internet.
+
+The build process creates the output files in the folder `build/install/object-copier`. Simply put the
+`object-copier-<version>.jar` library file and its mandatory dependencies from the `lib` folder on your modulepath to
+start developing with object-copier. Have fun :-)
+
+## Contributing
+* To file bugs found in the software create a GitHub issue.
+* To contribute code for fixing reported issues create a pull request with the issue id.
+* To propose a new feature create a GitHub issue and open a discussion.
+
+## License
+object-copier is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+See the `LICENSE` file for more details.
