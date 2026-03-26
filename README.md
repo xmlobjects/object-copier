@@ -48,7 +48,7 @@ Previous releases are available from the [releases section](https://github.com/x
 - **Thread-safe** after construction
 
 ## Maven artifact
-object-copier is also available as Maven artifact from the
+object-copier is available as Maven artifact from the
 [Maven Central Repository](https://search.maven.org/artifact/org.xmlobjects/object-copier). To add object-copier to your
 project with Maven, add the following code to your `pom.xml`. You may need to adapt the object-copier version number.
 
