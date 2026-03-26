@@ -77,12 +77,12 @@ public class CopyHelper {
         Method method = null;
         for (Method candidate : type.getDeclaredMethods()) {
             if (candidate.isSynthetic()
-                    || Modifier.isStatic(candidate.getModifiers())
                     || !candidate.isAnnotationPresent(CopyCreator.class)) {
                 continue;
             }
 
-            if (!candidate.getName().equals("newInstance")
+            if (Modifier.isStatic(candidate.getModifiers())
+                    || !candidate.getName().equals("newInstance")
                     || !type.isAssignableFrom(candidate.getReturnType())
                     || candidate.getParameterCount() != 2
                     || candidate.getParameterTypes()[0] != CopyMode.class
