@@ -20,11 +20,39 @@ A flexible deep and shallow copy framework for Java objects.
 - **Built-in support** for collections, maps, arrays, `Optional`, enums, records and all common JDK value types
 - **Thread-safe** after construction
 
-## Requirements
+## License
+object-copier is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+See the `LICENSE` file for more details.
 
-- Java 17 or later
+## Latest release
+The latest stable release of object-copier is 1.0.0.
 
-## Installation
+Download the latest object-copier release binaries [here](https://github.com/xmlobjects/object-copier/releases/latest).
+Previous releases are available from the [releases section](https://github.com/xmlobjects/object-copier/releases).
+
+## Contributing
+* To file bugs found in the software create a GitHub issue.
+* To contribute code for fixing reported issues create a pull request with the issue id.
+* To propose a new feature create a GitHub issue and open a discussion.
+
+## Building
+object-copier requires Java 17 or higher. The project uses [Gradle](https://gradle.org/) as build system. To build the
+library from source, clone the repository to your local machine and run the following command from the root of the
+repository.
+
+    > gradlew installDist
+
+The script automatically downloads all required dependencies for building the module. So make sure you are connected
+to the internet.
+
+The build process creates the output files in the folder `build/install/object-copier`. Simply put the
+`object-copier-<version>.jar` library file and its mandatory dependencies from the `lib` folder on your modulepath to
+start developing with object-copier. Have fun :-)
+
+## Maven artifact
+object-copier is also available as Maven artifact from the
+[Maven Central Repository](https://search.maven.org/artifact/org.xmlobjects/object-copier). To add object-copier to your
+project with Maven, add the following code to your `pom.xml`. You may need to adapt the object-copier version number.
 
 **Maven**
 ```xml
@@ -255,7 +283,7 @@ The framework is compatible with the Java module system. Classes in named module
 ```java
 // module-info.java of the module containing classes to be copied
 module com.example.myapp {
-    opens com.example.myapp.model to org.xmlobjects; // adjust to actual module name
+    opens com.example.myapp.model to org.xmlobjects.copy; // adjust to actual module name
 }
 ```
 
