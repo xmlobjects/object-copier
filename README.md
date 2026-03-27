@@ -311,21 +311,15 @@ public interface Child extends CopyCallback {
     @Override
     default void preCopy(CopyContext context, CopyMode mode, boolean isRoot) {
         if (isRoot) {
-            Child parent = getParent();
-            if (parent != null) {
-                context.exclude(parent);  // parent returned as-is, not copied
-            }
+            context.exclude(getParent());  // parent returned as-is, not copied
         }
     }
 
     @Override
     default void postCopy(CopyContext context, CopyMode mode, boolean isRoot) {
         if (isRoot) {
-            Child parent = getParent();
-            if (parent != null) {
-                context.include(parent);  // re-enable normal copying for parent
-                setParent(null);          // clone is detached from the original parent
-            }
+            context.include(getParent());  // re-enable normal copying for parent
+            setParent(null);               // clone is detached from the original parent
         }
     }
 }
