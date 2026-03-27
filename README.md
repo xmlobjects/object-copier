@@ -20,6 +20,7 @@ A flexible deep and shallow copy framework for Java objects.
 - [Built-in Identity Types](#built-in-identity-types)
 - [Custom Cloners](#custom-cloners)
 - [Copyable Interface](#copyable-interface)
+- [@CopyCreator](#copycreator)
 - [@CopyIgnore](#copyignore)
 - [CopyCallback](#copycallback)
 - [Module System](#module-system)
@@ -42,8 +43,8 @@ Previous releases are available from the [releases section](https://github.com/x
 - **Superclass cloner inheritance** – a cloner registered for `Animal` is automatically used for `Dog`
 - **`Copyable` interface** – let objects control their own copy behaviour
 - **`CopyCallback` interface** – `preCopy` / `postCopy` lifecycle hooks
-- **`@CopyIgnore`** – exclude individual fields from copying
 - **`@CopyCreator`** – custom factory method for instance creation
+- **`@CopyIgnore`** – exclude individual fields from copying
 - **Built-in support** for collections, maps, arrays, `Optional`, enums, records and all common JDK value types
 - **Thread-safe** after construction
 
@@ -239,21 +240,22 @@ public class Building extends AbstractFeature implements Copyable<Building> {
 
 The default implementations of `newInstance`, `shallowCopyTo` and `deepCopyTo` fall back to reflection, so you only need to override what differs.
 
-### `@CopyCreator`
+## `@CopyCreator`
 
-Use `@CopyCreator` on a `newInstance(CopyMode, CopyContext)` method when a class cannot be instantiated via a no-arg constructor:
+Use `@CopyCreator` on a `newInstance(CopyMode, CopyContext)` method when a class cannot be instantiated via a no-arg constructor.
+In contrast to the `Copyable` interface, the `@CopyCreator` method can be private:
 
 ```java
-public class ImmutableId implements Copyable<ImmutableId> {
+public class ImmutableId {
 
-    private final String value;
+    private String value;
 
-    public ImmutableId(String value) {
+    private ImmutableId(String value) {
         this.value = value;
     }
 
     @CopyCreator
-    public ImmutableId newInstance(CopyMode mode, CopyContext context) {
+    private ImmutableId newInstance(CopyMode mode, CopyContext context) {
         return new ImmutableId(value);
     }
 }
