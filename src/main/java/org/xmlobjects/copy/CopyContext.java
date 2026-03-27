@@ -21,6 +21,14 @@ public class CopyContext {
         return session;
     }
 
+    public boolean hasClone(Object src) {
+        return session.hasClone(src);
+    }
+
+    public Object lookupClone(Object src) {
+        return session.lookupClone(src);
+    }
+
     public <T> T lookupClone(Object src, Class<T> type) {
         return session.lookupClone(src, type);
     }
@@ -47,10 +55,6 @@ public class CopyContext {
 
     public void include(Object src) {
         session.include(src);
-    }
-
-    public boolean isExcluded(Object src) {
-        return session.isExcluded(src);
     }
 
     public <T> T shallowCopy(T src) {

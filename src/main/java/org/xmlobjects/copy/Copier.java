@@ -124,10 +124,6 @@ public class Copier {
         boolean isRoot = session.getAndSetRoot(false);
 
         try {
-            if (session.isExcluded(src)) {
-                return src;
-            }
-
             T clone = (T) session.getClone(src);
             if (clone == null) {
                 if (src instanceof CopyCallback callback) {
@@ -148,8 +144,10 @@ public class Copier {
                 if (clone instanceof CopyCallback callback) {
                     callback.postCopy(context, mode, isRoot);
                 }
-            } else if (session.isNullClone(clone)) {
+            } else if (clone == CopySession.NULL_CLONE) {
                 clone = null;
+            } else if (clone == CopySession.EXCLUDE_CLONE) {
+                clone = src;
             }
 
             return clone;

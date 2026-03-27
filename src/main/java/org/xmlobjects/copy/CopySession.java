@@ -5,27 +5,33 @@
 
 package org.xmlobjects.copy;
 
-import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 public class CopySession implements AutoCloseable {
-    private static final Object NULL_CLONE = new Object();
+    static final Object NULL_CLONE = new Object();
+    static final Object EXCLUDE_CLONE = new Object();
+
     private final Map<Object, Object> clones = new IdentityHashMap<>();
-    private final Set<Object> excludes = Collections.newSetFromMap(new IdentityHashMap<>());
     private boolean closed = false;
     private boolean root = true;
 
     CopySession() {
     }
 
-    public <T> T lookupClone(Object src, Class<T> type) {
+    public boolean hasClone(Object src) {
+        return lookupClone(src) != null;
+    }
+
+    public Object lookupClone(Object src) {
         Object clone = clones.get(src);
-        return !isNullClone(clone) && type.isInstance(clone) ?
-                type.cast(clone) :
-                null;
+        return clone == NULL_CLONE || clone == EXCLUDE_CLONE ? null : clone;
+    }
+
+    public <T> T lookupClone(Object src, Class<T> type) {
+        Object clone = lookupClone(src);
+        return type.isInstance(clone) ? type.cast(clone) : null;
     }
 
     Object getClone(Object src) {
@@ -54,23 +60,13 @@ public class CopySession implements AutoCloseable {
     }
 
     void exclude(Object src) {
-        if (src != null) {
-            excludes.add(src);
-        }
+        addClone(src, EXCLUDE_CLONE);
     }
 
     void include(Object src) {
         if (src != null) {
-            excludes.remove(src);
+            clones.computeIfPresent(src, (k, v) -> v == EXCLUDE_CLONE ? null : v);
         }
-    }
-
-    boolean isExcluded(Object src) {
-        return excludes.contains(src);
-    }
-
-    boolean isNullClone(Object clone) {
-        return clone == null || clone == NULL_CLONE;
     }
 
     boolean getAndSetRoot(boolean root) {
@@ -88,6 +84,5 @@ public class CopySession implements AutoCloseable {
         closed = true;
         root = true;
         clones.clear();
-        excludes.clear();
     }
 }
