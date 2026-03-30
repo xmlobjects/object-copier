@@ -29,7 +29,7 @@ A flexible deep and shallow copy framework for Java objects.
 - [License](#license)
 
 ## Latest release
-The latest stable release of object-copier is 1.0.0.
+The latest stable release of object-copier is 1.1.0.
 
 Download the latest object-copier release binaries [here](https://github.com/xmlobjects/object-copier/releases/latest).
 Previous releases are available from the [releases section](https://github.com/xmlobjects/object-copier/releases).
@@ -58,13 +58,13 @@ project with Maven, add the following code to your `pom.xml`. You may need to ad
 <dependency>
     <groupId>org.xmlobjects</groupId>
     <artifactId>object-copier</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 **Gradle**
 ```groovy
-implementation 'org.xmlobjects:object-copier:1.0.0'
+implementation 'org.xmlobjects:object-copier:1.1.0'
 ```
 
 ## Quick Start
