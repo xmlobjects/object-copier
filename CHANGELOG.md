@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [1.1.0] - 2026-03-30
+## [1.1.0] - 2026-03-31
 
 ### Added
 - Added `CopyContext.exclude(Object)` and `CopyContext.include(Object)` to temporarily exclude objects from being
