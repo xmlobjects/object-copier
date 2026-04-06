@@ -121,13 +121,12 @@ public class Copier {
             return null;
         }
 
-        boolean isRoot = session.getAndSetRoot(false);
-
+        context.enterCopy();
         try {
             T clone = (T) session.getClone(src);
             if (clone == null) {
                 if (src instanceof CopyCallback callback) {
-                    callback.preCopy(context, mode, isRoot);
+                    callback.preCopy(mode, context);
                 }
 
                 clone = dest == null ? cloner.newInstance(src, mode, context) : dest;
@@ -142,7 +141,7 @@ public class Copier {
                 }
 
                 if (clone instanceof CopyCallback callback) {
-                    callback.postCopy(context, mode, isRoot);
+                    callback.postCopy(mode, context);
                 }
             } else if (clone == CopySession.NULL_CLONE) {
                 clone = null;
@@ -156,9 +155,7 @@ public class Copier {
                     copyException :
                     new CopyException("Failed to copy " + src + ".", e);
         } finally {
-            if (isRoot) {
-                session.getAndSetRoot(true);
-            }
+            context.exitCopy();
         }
     }
 

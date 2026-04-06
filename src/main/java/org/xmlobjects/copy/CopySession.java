@@ -15,7 +15,6 @@ public class CopySession implements AutoCloseable {
 
     private final Map<Object, Object> clones = new IdentityHashMap<>();
     private boolean closed = false;
-    private boolean root = true;
 
     CopySession() {
     }
@@ -69,12 +68,6 @@ public class CopySession implements AutoCloseable {
         }
     }
 
-    boolean getAndSetRoot(boolean root) {
-        boolean result = this.root;
-        this.root = root;
-        return result;
-    }
-
     public boolean isClosed() {
         return closed;
     }
@@ -82,7 +75,6 @@ public class CopySession implements AutoCloseable {
     @Override
     public void close() {
         closed = true;
-        root = true;
         clones.clear();
     }
 }

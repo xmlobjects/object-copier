@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+- Added `CopyContext.isRoot()` to check whether the current object being copied is the root of the copy operation.
+
+### Changed
+- Removed the `isRoot` flag from `CopyCallback`, since this can now be determined via `CopyContext`.
+
 ## [1.1.0] - 2026-03-31
 
 ### Added

@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 public class CopyContext {
     private final CopySession session;
     private final Copier copier;
+    private int level;
 
     CopyContext(CopySession session, Copier copier) {
         this.session = session;
@@ -101,5 +102,17 @@ public class CopyContext {
 
     <T> void deepCopyFields(T src, T dest, Class<T> template) {
         copier.deepCopyFields(src, dest, template, this);
+    }
+
+    public boolean isRoot() {
+        return level == 1;
+    }
+
+    void enterCopy() {
+        level++;
+    }
+
+    void exitCopy() {
+        level--;
     }
 }

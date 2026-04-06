@@ -6,10 +6,10 @@
 package org.xmlobjects.copy;
 
 public interface CopyCallback {
-    default void preCopy(CopyContext context, CopyMode mode, boolean isRoot) {
+    default void preCopy(CopyMode mode, CopyContext context) {
     }
 
-    default void postCopy(CopyContext context, CopyMode mode, boolean isRoot) {
+    default void postCopy(CopyMode mode, CopyContext context) {
     }
 }
 
