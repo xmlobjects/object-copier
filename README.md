@@ -284,12 +284,12 @@ Implement `CopyCallback` to receive lifecycle notifications during copying. Both
 public class Building implements Copyable<Building>, CopyCallback {
 
     @Override
-    public void preCopy(CopyContext context, CopyMode mode, boolean isRoot) {
+    public void preCopy(CopyMode mode, CopyContext context) {
         // called on src before the clone is created
     }
 
     @Override
-    public void postCopy(CopyContext context, CopyMode mode, boolean isRoot) {
+    public void postCopy(CopyMode mode, CopyContext context) {
         // called on clone after all fields have been copied
     }
 }
