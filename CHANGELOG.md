@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+- Fixed copying into a target object of a sibling class or a superclass of the source object without a template.
+  The fields of the nearest common superclass are copied now.
+
 ## [1.2.0] - 2026-04-11
 
 ### Added

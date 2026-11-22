@@ -111,7 +111,10 @@ public class Copier {
         }
 
         if (template == null || src.getClass().isArray()) {
-            template = (Class<T>) src.getClass();
+            // when copying into a target object, only the fields of the common superclass can be copied
+            template = dest != null && !src.getClass().isArray() ?
+                    (Class<T>) commonSuperclass(src.getClass(), dest.getClass()) :
+                    (Class<T>) src.getClass();
         }
 
         TypeCloner<T> cloner = (TypeCloner<T>) findCloner(template);
@@ -181,6 +184,16 @@ public class Copier {
                 throw new CopyException("Failed to deep copy fields of " + src.getClass().getName() + ".", e);
             }
         }
+    }
+
+    private Class<?> commonSuperclass(Class<?> a, Class<?> b) {
+        for (Class<?> current = a; current != null; current = current.getSuperclass()) {
+            if (current.isAssignableFrom(b)) {
+                return current;
+            }
+        }
+
+        return Object.class;
     }
 
     private TypeCloner<?> findCloner(Class<?> type) {

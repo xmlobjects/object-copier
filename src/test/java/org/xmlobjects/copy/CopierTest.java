@@ -57,4 +57,30 @@ class CopierTest {
         assertSame(a.tags, copy.tags);
     }
 
+    @Test
+    void copyIntoSiblingCopiesCommonFields() {
+        Dog dog = new Dog();
+        dog.name = "rex";
+        dog.legs = 4;
+        Cat cat = new Cat();
+
+        Copier copier = CopierBuilder.newCopier();
+        assertSame(cat, copier.shallowCopy(dog, cat));
+        assertEquals("rex", cat.name);
+
+        Cat other = new Cat();
+        assertSame(other, copier.deepCopy(dog, other));
+        assertEquals("rex", other.name);
+    }
+
+    @Test
+    void copyIntoSuperclassInstanceCopiesCommonFields() {
+        Dog dog = new Dog();
+        dog.name = "rex";
+        Base base = new Base();
+
+        assertSame(base, CopierBuilder.newCopier().shallowCopy(dog, base));
+        assertEquals("rex", base.name);
+    }
+
 }
