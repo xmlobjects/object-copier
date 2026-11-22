@@ -7,8 +7,7 @@ package org.xmlobjects.copy;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -144,6 +143,36 @@ class CopierTest {
 
             assertSame(a, copier.deepCopy(a, dest, session));
             assertNull(dest.name);
+        }
+    }
+
+    static class Failing extends Person implements CopyCallback {
+        static boolean fail;
+
+        @Override
+        public void postCopy(CopyMode mode, CopyContext context) {
+            if (fail) {
+                throw new IllegalStateException("failed");
+            }
+        }
+    }
+
+    @Test
+    void failedCopyIsNotKeptInSession() {
+        Copier copier = CopierBuilder.newCopier();
+        Failing a = new Failing();
+        a.name = "a";
+
+        try (CopySession session = copier.createSession()) {
+            Failing.fail = true;
+            assertThrows(CopyException.class, () -> copier.deepCopy(a, session));
+            assertFalse(session.hasClone(a));
+
+            Failing.fail = false;
+            Failing copy = copier.deepCopy(a, session);
+            assertEquals("a", copy.name);
+        } finally {
+            Failing.fail = false;
         }
     }
 }

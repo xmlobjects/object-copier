@@ -124,6 +124,7 @@ public class Copier {
             return null;
         }
 
+        boolean added = false;
         context.enterCopy();
         try {
             T clone = (T) session.getClone(src);
@@ -140,6 +141,7 @@ public class Copier {
                 clone = dest == null ? cloner.newInstance(src, mode, context) : dest;
                 if (!registered) {
                     session.addClone(src, clone);
+                    added = true;
                 }
 
                 if (clone != null) {
@@ -161,6 +163,11 @@ public class Copier {
 
             return clone;
         } catch (Exception e) {
+            // do not keep a partially copied clone in the session
+            if (added) {
+                session.removeClone(src);
+            }
+
             throw e instanceof CopyException copyException ?
                     copyException :
                     new CopyException("Failed to copy " + src + ".", e);

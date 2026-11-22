@@ -58,6 +58,10 @@ public class CopySession implements AutoCloseable {
         }
     }
 
+    void removeClone(Object src) {
+        clones.remove(src);
+    }
+
     void exclude(Object src) {
         addCloneIfAbsent(src, EXCLUDE_CLONE);
     }

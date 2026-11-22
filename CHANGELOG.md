@@ -8,6 +8,7 @@
 - Fixed cloners registered for a superclass being ignored for subclasses of collections and maps.
 - Fixed copying into a target object doing nothing when the source object had already been copied in the same
   session. The target object is filled now, while the session keeps the existing clone of the source object.
+- Fixed a partially copied object remaining registered in the copy session when its copy failed.
 
 ## [1.2.0] - 2026-04-11
 
