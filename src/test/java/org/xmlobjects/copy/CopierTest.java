@@ -175,4 +175,13 @@ class CopierTest {
             Failing.fail = false;
         }
     }
+
+    @Test
+    void copyKeepsOrderOfSequencedSetsWithoutNoArgConstructor() {
+        SequencedSet<String> set = Collections.unmodifiableSequencedSet(
+                new LinkedHashSet<>(List.of("c", "a", "b", "e", "d", "f", "h", "g")));
+
+        Set<String> copy = CopierBuilder.newCopier().deepCopy(set);
+        assertEquals(List.copyOf(set), List.copyOf(copy));
+    }
 }

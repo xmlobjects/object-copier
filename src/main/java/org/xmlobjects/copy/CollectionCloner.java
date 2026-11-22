@@ -36,6 +36,8 @@ public class CollectionCloner<T extends Collection> extends TypeCloner<T> {
 
         if (src instanceof List) {
             return (T) new ArrayList<>(src.size());
+        } else if (src instanceof SequencedSet) {
+            return (T) new LinkedHashSet<>(src.size());
         } else if (src instanceof Set) {
             return (T) new HashSet<>(src.size());
         } else if (src instanceof Deque) {
