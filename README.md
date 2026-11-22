@@ -117,6 +117,10 @@ copier.deepCopy(src, dest);
 copier.deepCopy(src, dest, AbstractBase.class);
 ```
 
+A target object is always filled, even if the source object has already been copied in the same session. The session
+keeps its existing clone of the source object, so later references to the source object still resolve to that clone.
+Without a template, the fields of the nearest common superclass of the source and target object are copied.
+
 ## Copy Sessions
 
 A `CopySession` tracks all clones created during a copy operation and is used to detect circular references. By default each top-level copy call creates its own session. Pass an explicit session to share the clone cache across multiple calls:

@@ -127,13 +127,20 @@ public class Copier {
         context.enterCopy();
         try {
             T clone = (T) session.getClone(src);
-            if (clone == null) {
+            if (clone == null || (dest != null
+                    && clone != CopySession.NULL_CLONE
+                    && clone != CopySession.EXCLUDE_CLONE)) {
                 if (src instanceof CopyCallback callback) {
                     callback.preCopy(mode, context);
                 }
 
+                // an explicit target object is always filled, but an existing clone of the
+                // source object remains registered in the session
+                boolean registered = clone != null;
                 clone = dest == null ? cloner.newInstance(src, mode, context) : dest;
-                session.addClone(src, clone);
+                if (!registered) {
+                    session.addClone(src, clone);
+                }
 
                 if (clone != null) {
                     if (mode == CopyMode.SHALLOW) {

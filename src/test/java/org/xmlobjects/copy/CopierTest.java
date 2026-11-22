@@ -110,4 +110,40 @@ class CopierTest {
         assertEquals("special", copy.name);
         assertEquals(List.of("x"), copy);
     }
+
+    @Test
+    void copyIntoTargetFillsTargetAlthoughSourceWasAlreadyCopied() {
+        Copier copier = CopierBuilder.newCopier();
+        Person a = new Person();
+        a.name = "a";
+
+        try (CopySession session = copier.createSession()) {
+            Person first = copier.deepCopy(a, session);
+            Person dest = new Person();
+
+            assertSame(dest, copier.deepCopy(a, dest, session));
+            assertEquals("a", dest.name);
+            assertSame(first, session.lookupClone(a));
+
+            Person other = new Person();
+            assertSame(other, copier.shallowCopy(a, other, session));
+            assertEquals("a", other.name);
+        }
+    }
+
+    @Test
+    void excludedSourceIsNotCopiedIntoTarget() {
+        Copier copier = CopierBuilder.newCopier();
+        Person a = new Person();
+        a.name = "a";
+
+        try (CopySession session = copier.createSession()) {
+            CopyContext context = copier.createContext(session);
+            context.exclude(a);
+            Person dest = new Person();
+
+            assertSame(a, copier.deepCopy(a, dest, session));
+            assertNull(dest.name);
+        }
+    }
 }
