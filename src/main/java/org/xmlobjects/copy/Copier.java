@@ -203,7 +203,17 @@ public class Copier {
     private TypeCloner<?> createCloner(Class<?> type) {
         if (Copyable.class.isAssignableFrom(type)) {
             return copyableCloner;
-        } else if (Enum.class.isAssignableFrom(type)) {
+        }
+
+        // a cloner registered for a superclass takes precedence over the built-in cloners
+        if (!registeredCloners.isEmpty()) {
+            TypeCloner<?> cloner = findSuperclassCloner(type);
+            if (cloner != null) {
+                return cloner;
+            }
+        }
+
+        if (Enum.class.isAssignableFrom(type)) {
             return IDENTITY_CLONER;
         } else if (type.isRecord()) {
             return IDENTITY_CLONER;
@@ -213,14 +223,9 @@ public class Copier {
             return mapCloner;
         } else if (type.isArray()) {
             return arrayCloner;
-        } else if (!registeredCloners.isEmpty()) {
-            TypeCloner<?> cloner = findSuperclassCloner(type);
-            if (cloner != null) {
-                return cloner;
-            }
+        } else {
+            return new ObjectCloner<>(type);
         }
-
-        return new ObjectCloner<>(type);
     }
 
     private TypeCloner<?> findSuperclassCloner(Class<?> type) {

@@ -83,4 +83,31 @@ class CopierTest {
         assertEquals("rex", base.name);
     }
 
+    static class NamedList extends ArrayList<String> {
+        String name;
+    }
+
+    static class SpecialList extends NamedList {
+    }
+
+    @Test
+    void superclassClonerIsUsedForCollectionSubclasses() {
+        Copier copier = CopierBuilder.newInstance()
+                .withCloner(NamedList.class, new TypeCloner<>() {
+                    @Override
+                    protected void deepCopy(NamedList src, NamedList dest, CopyContext context) {
+                        dest.name = src.name;
+                        dest.addAll(src);
+                    }
+                })
+                .build();
+
+        SpecialList list = new SpecialList();
+        list.name = "special";
+        list.add("x");
+
+        SpecialList copy = copier.deepCopy(list);
+        assertEquals("special", copy.name);
+        assertEquals(List.of("x"), copy);
+    }
 }
