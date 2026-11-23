@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-23
+
 ### Changed
 - **Breaking:** Java 21 is now the minimum required version for using object-copier.
 
@@ -31,7 +33,8 @@
 ## [1.0.0] - 2026-03-26
 This is the initial release of object-copier.
 
-[Unreleased]: https://github.com/xmlobjects/object-copier/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/xmlobjects/object-copier/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/xmlobjects/object-copier/releases/tag/v2.0.0
 [1.2.0]: https://github.com/xmlobjects/object-copier/releases/tag/v1.2.0
 [1.1.0]: https://github.com/xmlobjects/object-copier/releases/tag/v1.1.0
 [1.0.0]: https://github.com/xmlobjects/object-copier/releases/tag/v1.0.0
