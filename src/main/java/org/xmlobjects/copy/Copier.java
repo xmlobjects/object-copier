@@ -111,9 +111,8 @@ public class Copier {
         }
 
         if (template == null || src.getClass().isArray()) {
-            // when copying into a target object, only the fields of the common superclass can be copied
             template = dest != null && !src.getClass().isArray() ?
-                    (Class<T>) commonSuperclass(src.getClass(), dest.getClass()) :
+                    (Class<T>) getCommonSuperclass(src.getClass(), dest.getClass()) :
                     (Class<T>) src.getClass();
         }
 
@@ -163,7 +162,6 @@ public class Copier {
 
             return clone;
         } catch (Exception e) {
-            // do not keep a partially copied clone in the session
             if (added) {
                 session.removeClone(src);
             }
@@ -200,7 +198,7 @@ public class Copier {
         }
     }
 
-    private Class<?> commonSuperclass(Class<?> a, Class<?> b) {
+    private Class<?> getCommonSuperclass(Class<?> a, Class<?> b) {
         for (Class<?> current = a; current != null; current = current.getSuperclass()) {
             if (current.isAssignableFrom(b)) {
                 return current;
@@ -219,7 +217,6 @@ public class Copier {
             return copyableCloner;
         }
 
-        // a cloner registered for a superclass takes precedence over the built-in cloners
         if (!registeredCloners.isEmpty()) {
             TypeCloner<?> cloner = findSuperclassCloner(type);
             if (cloner != null) {
